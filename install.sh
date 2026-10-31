@@ -11,7 +11,7 @@ die() {
     exit 1
 }
 
-if (( EUID == 0 )); then
+if ((EUID == 0)); then
     die 'do not run as root; install per-user, no sudo needed.'
 fi
 

@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  SHFMT_VERSION: 3.10.0
+  SHFMT_SHA256: 1f57a384d59542f8fac5f503da1f3ea44242f46dff969569e80b524d64b71dbc
+
+jobs:
+  lint:
+    name: Lint and smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: ShellCheck
+        run: shellcheck warpctl install.sh
+
+      - name: Install shfmt
+        run: |
+          curl -fsSL -o /tmp/shfmt \
+            "https://github.com/mvdan/sh/releases/download/v${SHFMT_VERSION}/shfmt_v${SHFMT_VERSION}_linux_amd64"
+          echo "${SHFMT_SHA256}  /tmp/shfmt" | sha256sum -c -
+          chmod +x /tmp/shfmt
+
+      - name: Check formatting
+        run: /tmp/shfmt -d -i 4 -ci warpctl install.sh
+
+      - name: Smoke test
+        run: |
+          bash -n warpctl install.sh
+          ./warpctl help
+          if ./warpctl bogus; then
+            echo "expected a non-zero exit for an unknown command" >&2
+            exit 1
+          fi

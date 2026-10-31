@@ -14,7 +14,7 @@ die() {
 }
 
 # Keep the desktop service in the current user's session, not root's.
-if (( EUID == 0 )); then
+if ((EUID == 0)); then
     die 'run as your normal user, without sudo. It asks for sudo when needed.'
 fi
 
@@ -75,13 +75,13 @@ case "${1:-help}" in
         report user "$TASKBAR" "$TASKBAR"
         printf '\n'
         if [[ $(systemctl is-enabled "$SVC" 2>/dev/null || true) == masked ]] &&
-           [[ $(systemctl --user is-enabled "$TASKBAR" 2>/dev/null || true) == masked ]]; then
+            [[ $(systemctl --user is-enabled "$TASKBAR" 2>/dev/null || true) == masked ]]; then
             printf 'WARP is off and will not start on boot.\n'
         else
             printf 'WARP is not fully off; at least one unit can still start.\n'
         fi
         ;;
-    help|-h|--help)
+    help | -h | --help)
         usage
         ;;
     *)
