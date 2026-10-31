@@ -4,7 +4,11 @@ set -euo pipefail
 REPO=arnavsx3/warpctl
 VERSION=${WARPCTL_VERSION:-v1.0.0}
 DEST=${WARPCTL_DEST:-$HOME/.local/bin}
-SELF_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+SELF_DIR=
+# When piped (`curl ... | bash`) there is no script path, so skip the local-checkout mode.
+if [[ -n ${BASH_SOURCE[0]:-} && -f ${BASH_SOURCE[0]} ]]; then
+    SELF_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+fi
 
 die() {
     printf 'install: %s\n' "$1" >&2
@@ -18,7 +22,7 @@ fi
 tmp=$(mktemp)
 trap 'rm -f "$tmp"' EXIT
 
-if [[ -f $SELF_DIR/warpctl ]]; then
+if [[ -n $SELF_DIR && -f $SELF_DIR/warpctl ]]; then
     src=$SELF_DIR/warpctl
     printf 'Installing from local checkout: %s\n' "$src"
 else

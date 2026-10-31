@@ -40,3 +40,9 @@ jobs:
             echo "expected a non-zero exit for an unknown command" >&2
             exit 1
           fi
+
+      - name: Installer works when piped
+        run: |
+          mkdir -p "$RUNNER_TEMP/bin"
+          cat install.sh | WARPCTL_DEST="$RUNNER_TEMP/bin" bash
+          "$RUNNER_TEMP/bin/warpctl" help
