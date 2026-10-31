@@ -16,12 +16,35 @@ A tiny script to turn the Cloudflare WARP Linux client **off for good** — and 
 - The official **`cloudflare-warp`** package installed (`apt install cloudflare-warp`, `dnf install cloudflare-warp`, etc.)
 - `sudo` access, for the system-level service
 
+## Install
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/arnavsx3/warpctl/main/install.sh | bash
+```
+
+This installs to `~/.local/bin` and needs no `sudo`. Set `WARPCTL_VERSION=v1.0.0` to pin a release tag. Prefer not to pipe to bash?
+
+```sh
+git clone https://github.com/arnavsx3/warpctl
+cd warpctl && ./install.sh
+```
+
 ## Usage
 
 ```sh
 warpctl off      # stop WARP and block it from starting
 warpctl on       # unblock and start WARP again
 warpctl status   # show whether each part is running and whether it can start
+```
+
+`status` reports running state and boot state separately, because `inactive` alone can't tell "stopped" from "blocked from ever starting":
+
+```
+  UNIT                   STATE     BOOT
+  warp-svc.service       inactive  masked
+  warp-taskbar.service   inactive  masked
+
+WARP is off and will not start on boot.
 ```
 
 `off` asks for `sudo` when it touches the system-level service; `on` does the same to restore it. The script refuses to run under `root` — run it as your normal user.

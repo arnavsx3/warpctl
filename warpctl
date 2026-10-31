@@ -1,12 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Keep the desktop service in the current user's session, not root's.
-if (( EUID == 0 )); then
-    printf 'Run warpctl as your normal user, without sudo. It asks for sudo when needed.\n' >&2
-    exit 1
-fi
-
 SVC=warp-svc.service
 TASKBAR=warp-taskbar.service
 
@@ -14,7 +8,40 @@ usage() {
     printf 'Usage: warpctl {on|off|status}\n'
 }
 
-report() { # <scope> <unit> <label>
+die() {
+    printf 'warpctl: %s\n' "$1" >&2
+    exit 1
+}
+
+# Keep the desktop service in the current user's session, not root's.
+if (( EUID == 0 )); then
+    die 'run as your normal user, without sudo. It asks for sudo when needed.'
+fi
+
+unit_present() { # <system|user> <unit>
+    local scope=$1 unit=$2
+    if [[ $scope == user ]]; then
+        systemctl --user list-unit-files "$unit" --no-legend >/dev/null 2>&1
+    else
+        systemctl list-unit-files "$unit" --no-legend >/dev/null 2>&1
+    fi
+}
+
+require_prereqs() {
+    command -v systemctl >/dev/null 2>&1 ||
+        die 'systemctl not found; warpctl needs systemd.'
+
+    unit_present system "$SVC" ||
+        die "$SVC not found; is the cloudflare-warp package installed?"
+
+    systemctl --user show-environment >/dev/null 2>&1 ||
+        die 'no systemd user session; run this from a graphical login, not a bare ssh shell.'
+
+    unit_present user "$TASKBAR" ||
+        die "$TASKBAR not found; is the cloudflare-warp package installed?"
+}
+
+report() { # <system|user> <unit> <label>
     local scope=$1 unit=$2 label=$3 active enabled
     if [[ $scope == user ]]; then
         active=$(systemctl --user is-active "$unit" 2>/dev/null || true)
@@ -28,11 +55,13 @@ report() { # <scope> <unit> <label>
 
 case "${1:-help}" in
     off)
+        require_prereqs
         systemctl --user mask --now "$TASKBAR"
         sudo systemctl mask --now "$SVC"
         printf 'Cloudflare WARP is off and blocked from starting.\n'
         ;;
     on)
+        require_prereqs
         sudo systemctl unmask "$SVC"
         sudo systemctl start "$SVC"
         systemctl --user unmask "$TASKBAR"
@@ -40,9 +69,10 @@ case "${1:-help}" in
         printf 'Cloudflare WARP services are running.\n'
         ;;
     status)
+        require_prereqs
         printf '  %-22s %-9s %s\n' UNIT STATE BOOT
-        report system "$SVC" 'warp-svc.service'
-        report user "$TASKBAR" 'warp-taskbar.service'
+        report system "$SVC" "$SVC"
+        report user "$TASKBAR" "$TASKBAR"
         printf '\n'
         if [[ $(systemctl is-enabled "$SVC" 2>/dev/null || true) == masked ]] &&
            [[ $(systemctl --user is-enabled "$TASKBAR" 2>/dev/null || true) == masked ]]; then
