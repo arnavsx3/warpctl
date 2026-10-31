@@ -2,7 +2,7 @@
 set -euo pipefail
 
 REPO=arnavsx3/warpctl
-VERSION=${WARPCTL_VERSION:-main}
+VERSION=${WARPCTL_VERSION:-v1.0.0}
 DEST=${WARPCTL_DEST:-$HOME/.local/bin}
 SELF_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 
