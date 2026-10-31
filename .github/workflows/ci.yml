@@ -44,5 +44,5 @@ jobs:
       - name: Installer works when piped
         run: |
           mkdir -p "$RUNNER_TEMP/bin"
-          cat install.sh | WARPCTL_DEST="$RUNNER_TEMP/bin" bash
+          cat install.sh | WARPCTL_URL="file://$PWD/warpctl" WARPCTL_DEST="$RUNNER_TEMP/bin" bash
           "$RUNNER_TEMP/bin/warpctl" help

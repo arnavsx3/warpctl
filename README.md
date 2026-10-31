@@ -19,10 +19,10 @@ A tiny script to turn the Cloudflare WARP Linux client **off for good** — and 
 ## Install
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/arnavsx3/warpctl/v1.0.0/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/arnavsx3/warpctl/v1.0.1/install.sh | bash
 ```
 
-This installs the pinned `v1.0.0` release to `~/.local/bin` and needs no `sudo`. Override `WARPCTL_VERSION` to install a different tag. Prefer not to pipe to bash?
+This installs the pinned `v1.0.1` release to `~/.local/bin` and needs no `sudo`. Override `WARPCTL_VERSION` to install a different tag. Prefer not to pipe to bash?
 
 ```sh
 git clone https://github.com/arnavsx3/warpctl

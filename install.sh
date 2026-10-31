@@ -2,7 +2,7 @@
 set -euo pipefail
 
 REPO=arnavsx3/warpctl
-VERSION=${WARPCTL_VERSION:-v1.0.0}
+VERSION=${WARPCTL_VERSION:-v1.0.1}
 DEST=${WARPCTL_DEST:-$HOME/.local/bin}
 SELF_DIR=
 # When piped (`curl ... | bash`) there is no script path, so skip the local-checkout mode.
@@ -27,7 +27,7 @@ if [[ -n $SELF_DIR && -f $SELF_DIR/warpctl ]]; then
     printf 'Installing from local checkout: %s\n' "$src"
 else
     command -v curl >/dev/null 2>&1 || die 'curl is required.'
-    url="https://raw.githubusercontent.com/$REPO/$VERSION/warpctl"
+    url=${WARPCTL_URL:-https://raw.githubusercontent.com/$REPO/$VERSION/warpctl}
     printf 'Fetching %s\n' "$url"
     curl -fsSL "$url" -o "$tmp" || die "download failed: $url"
     src=$tmp
@@ -51,7 +51,7 @@ case ":$PATH:" in
 esac
 
 if [[ $VERSION == main && $src == "$tmp" ]]; then
-    printf '\nNote: installed from main, not a release tag. Set WARPCTL_VERSION=v1.0.0 to pin.\n'
+    printf '\nNote: installed from main, not a release tag. Set WARPCTL_VERSION to a tag to pin.\n'
 fi
 
 printf '\nNext: warpctl status\n'
